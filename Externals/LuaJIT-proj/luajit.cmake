@@ -135,19 +135,14 @@ string(REPLACE " " ";" TESTARCH_C_FLAGS "${TESTARCH_C_FLAGS}")
 
 set(TESTARCH_FLAGS "${TESTARCH_C_FLAGS} ${CCOPTIONS}")
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-  # /d1PP is undocumented but widely known & used, causes pre-processor to not strip defines
+  # /d1PP is undocumented but widely known & used
+  # causes pre-processor to not strip defines, which are used for target detection below
 	string(APPEND TESTARCH_FLAGS " /EP /d1PP lj_arch.h")
 else()
 	string(APPEND TESTARCH_FLAGS " -E lj_arch.h -dM")
 endif()
 string(REPLACE " " ";" TESTARCH_FLAGS "${TESTARCH_FLAGS}")
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-	execute_process(
-		COMMAND ${CMAKE_C_COMPILER} ${TESTARCH_FLAGS}
-		WORKING_DIRECTORY ${LUAJIT_DIR}
-	)
-endif()
 execute_process(
 	COMMAND ${CMAKE_C_COMPILER} ${TESTARCH_FLAGS}
 	WORKING_DIRECTORY ${LUAJIT_DIR}
