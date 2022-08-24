@@ -132,9 +132,9 @@ string(REPLACE " " ";" TESTARCH_C_FLAGS "${TESTARCH_C_FLAGS}")
 
 set(TESTARCH_FLAGS "${TESTARCH_C_FLAGS} ${CCOPTIONS}")# -E lj_arch.h -dM")
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-	string(APPEND TESTARCH_FLAGS "/EP lj_arch.h")
+	string(APPEND TESTARCH_FLAGS " /EP lj_arch.h")
 else()
-	string(APPEND TESTARCH_FLAGS "-E lj_arch.h -dM")
+	string(APPEND TESTARCH_FLAGS " -E lj_arch.h -dM")
 endif()
 string(REPLACE " " ";" TESTARCH_FLAGS "${TESTARCH_FLAGS}")
 
