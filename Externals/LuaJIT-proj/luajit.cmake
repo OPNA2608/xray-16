@@ -55,11 +55,14 @@ set(LUA_PATH "LUA_PATH" CACHE STRING "Environment variable to use as package.pat
 set(LUA_CPATH "LUA_CPATH" CACHE STRING "Environment variable to use as package.cpath")
 set(LUA_INIT "LUA_INIT" CACHE STRING "Environment variable for initial script")
 
-# Clean unnecessary files in LuaJIT source directory
-execute_process(
-	COMMAND ${CMAKE_MAKE_PROGRAM} clean
-	WORKING_DIRECTORY ${LUAJIT_DIR}
-)
+# TODO: how to do that on MSVC?
+if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+	# Clean unnecessary files in LuaJIT source directory
+	execute_process(
+		COMMAND ${CMAKE_MAKE_PROGRAM} clean
+		WORKING_DIRECTORY ${LUAJIT_DIR}
+	)
+endif()
 
 # Compiler options
 if (PROJECT_PLATFORM_E2K) # E2K: O3 on mcst-lcc approximately equal to O2 at gcc X86/ARM
@@ -83,10 +86,10 @@ if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 	if (CCDEBUG)
 		set(LUAJIT_DEBUG "-g")
 	endif()
-endif()
 
-set(CCWARN "-Wall")
-#string(APPEND CCWARN "-Wextra -Wdeclaration-after-statement -Wredundant-decls -Wshadow -Wpointer-arith")
+	set(CCWARN "-Wall")
+	#string(APPEND CCWARN "-Wextra -Wdeclaration-after-statement -Wredundant-decls -Wshadow -Wpointer-arith")
+endif()
 
 if (LUAJIT_DISABLE_FFI)
 	string(APPEND XCFLAGS " -DLUAJIT_DISABLE_FFI")
@@ -138,6 +141,12 @@ else()
 endif()
 string(REPLACE " " ";" TESTARCH_FLAGS "${TESTARCH_FLAGS}")
 
+if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+	execute_process(
+		COMMAND ${CMAKE_C_COMPILER} ${TESTARCH_FLAGS}
+		WORKING_DIRECTORY ${LUAJIT_DIR}
+	)
+endif()
 execute_process(
 	COMMAND ${CMAKE_C_COMPILER} ${TESTARCH_FLAGS}
 	WORKING_DIRECTORY ${LUAJIT_DIR}
