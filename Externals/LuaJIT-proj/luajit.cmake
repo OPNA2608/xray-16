@@ -68,18 +68,21 @@ else()
 	set(CCOPT_OPT_LEVEL "-O2")
 endif()
 
-set(CCOPT "${CCOPT_OPT_LEVEL} -fomit-frame-pointer -fno-stack-protector")
+set(CCOPT "${CCOPT_OPT_LEVEL}")
+if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+	string(APPEND CCOPT "-fomit-frame-pointer -fno-stack-protector")
 
-# Target-specific compiler options
-set(CCOPT_x86 "-march=i686 -msse -msse2 -mfpmath=sse")
-set(CCOPT_x64 "")
-set(CCOPT_arm "")
-set(CCOPT_arm64 "")
-set(CCOPT_ppc "")
-set(CCOPT_mips "")
+	# Target-specific compiler options
+	set(CCOPT_x86 "-march=i686 -msse -msse2 -mfpmath=sse")
+	set(CCOPT_x64 "")
+	set(CCOPT_arm "")
+	set(CCOPT_arm64 "")
+	set(CCOPT_ppc "")
+	set(CCOPT_mips "")
 
-if (CCDEBUG)
-	set(LUAJIT_DEBUG "-g")
+	if (CCDEBUG)
+		set(LUAJIT_DEBUG "-g")
+	endif()
 endif()
 
 set(CCWARN "-Wall")
@@ -127,7 +130,12 @@ set(CCOPTIONS ${CCDEBUG} ${ASOPTIONS})
 set(TESTARCH_C_FLAGS ${CMAKE_C_FLAGS})
 string(REPLACE " " ";" TESTARCH_C_FLAGS "${TESTARCH_C_FLAGS}")
 
-set(TESTARCH_FLAGS "${TESTARCH_C_FLAGS} ${CCOPTIONS} -E lj_arch.h -dM")
+set(TESTARCH_FLAGS "${TESTARCH_C_FLAGS} ${CCOPTIONS}")# -E lj_arch.h -dM")
+if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+	string(APPEND TESTARCH_FLAGS "/EP lj_arch.h")
+else()
+	string(APPEND TESTARCH_FLAGS "-E lj_arch.h -dM")
+endif()
 string(REPLACE " " ";" TESTARCH_FLAGS "${TESTARCH_FLAGS}")
 
 execute_process(
@@ -180,7 +188,10 @@ if (WIN32)
 	#string(APPEND TARGET_STRIP "--strip-unneeded")
 
 	set(TARGET_DLLDOTANAME "libluajit-${ABIVER}.dll.a")
-	string(APPEND TARGET_XSHLDFLAGS " -shared -Wl,--out-implib,${TARGET_DLLDOTANAME}")
+	# TODO MSVC?
+	if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+		string(APPEND TARGET_XSHLDFLAGS " -shared -Wl,--out-implib,${TARGET_DLLDOTANAME}")
+	endif()
 
 	if (BUILD_DYNAMIC_LIB)
 		string(APPEND HOST_XCFLAGS " -DLUA_BUILD_AS_DLL")

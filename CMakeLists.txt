@@ -155,7 +155,9 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND NOT XRAY_USE_DEFAULT_CXX_LIB)
     endif()
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -Wl,--no-undefined -fvisibility=hidden")
+if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -Wl,--no-undefined -fvisibility=hidden")
+endif()
 
 #set(SANITIZE_FLAGS "-fsanitize=address  -fsanitize=leak -fno-omit-frame-pointer -g -fsanitize=undefined -fno-sanitize=vptr")
 #if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -169,20 +171,22 @@ set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${SANITIZE_FLAGS}")
 
 set(LUA_LIBRARIES xrLuajit)
 
-if (PROJECT_PLATFORM_ARM)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfpu=neon")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpu=neon")
-elseif (PROJECT_PLATFORM_ARM64)
-    set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
-elseif (PROJECT_PLATFORM_E2K)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unknown-pragmas")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
-else()
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfpmath=sse -msse3")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpmath=sse -msse3")
+if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    if (PROJECT_PLATFORM_ARM)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfpu=neon")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpu=neon")
+    elseif (PROJECT_PLATFORM_ARM64)
+        set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
+    elseif (PROJECT_PLATFORM_E2K)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unknown-pragmas")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
+    else()
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfpmath=sse -msse3")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpmath=sse -msse3")
+    endif()
 endif()
 
-option(XRAY_USE_DEFAULT_LINKER "Don't select linker, use system default." OFF)
+option(XRAY_USE_DEFAULT_LINKER "Don't select linker, use system default." WIN32)
 
 if (NOT XRAY_LINKER AND NOT XRAY_USE_DEFAULT_LINKER)
     include(CheckCXXCompilerFlag)
@@ -207,7 +211,9 @@ endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DDEBUG -DMIXED)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Og")
+    if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Og")
+    endif()
     set(LUA_LIBRARIES xrLuajit-debug)
 endif()
 
@@ -275,28 +281,30 @@ include_directories(
 
 add_subdirectory(Externals)
 
-set(CMAKE_CXX_FLAGS
-    "${CMAKE_CXX_FLAGS}"
-    "-Wall"
-    #"-Werror"
-    #"-Wextra"
-    #"-pedantic"
-    "-Wno-unknown-pragmas"
-    "-Wno-strict-aliasing"
-    "-Wno-class-memaccess"
-    "-Wno-parentheses"
-    "-Wno-unused-label"
-    "-Wno-switch"
-    #"-Wno-padded"
-    #"-Wno-c++98-compat"
-    #"-Wno-c++98-compat-pedantic"
-    #"-Wno-c++11-compat"
-    #"-Wno-c++11-compat-pedantic"
-    #"-Wno-c++14-compat"
-    #"-Wno-c++14-compat-pedantic"
-    #"-Wno-newline-eof"
-)
-string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    set(CMAKE_CXX_FLAGS
+        "${CMAKE_CXX_FLAGS}"
+        "-Wall"
+        #"-Werror"
+        #"-Wextra"
+        #"-pedantic"
+        "-Wno-unknown-pragmas"
+        "-Wno-strict-aliasing"
+        "-Wno-class-memaccess"
+        "-Wno-parentheses"
+        "-Wno-unused-label"
+        "-Wno-switch"
+        #"-Wno-padded"
+        #"-Wno-c++98-compat"
+        #"-Wno-c++98-compat-pedantic"
+        #"-Wno-c++11-compat"
+        #"-Wno-c++11-compat-pedantic"
+        #"-Wno-c++14-compat"
+        #"-Wno-c++14-compat-pedantic"
+        #"-Wno-newline-eof"
+    )
+    string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+endif()
 
 add_subdirectory(src)
 add_subdirectory(res)
