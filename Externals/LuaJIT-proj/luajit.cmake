@@ -329,10 +329,17 @@ endif()
 
 # Generate buildvm arch header
 if (NOT PROJECT_PLATFORM_E2K)
+	set(MINILUA_BUILDDIR "${CMAKE_CURRENT_BINARY_DIR}/HostBuildTools/minilua")
+	set(MINILUA_EXEC "${MINILUA_BUILDDIR}")
+	if (MSVC)
+		string(APPEND MINILUA_EXEC "/Release")
+	endif()
+	string(APPEND MINILUA_EXEC "/minilua${CMAKE_EXECUTABLE_SUFFIX}")
+
 	add_custom_command(
-		OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/HostBuildTools/minilua/minilua"
+		OUTPUT ${MINILUA_EXEC}
 		COMMAND ${CMAKE_COMMAND}
-			-B"HostBuildTools/minilua"
+			-B"${MINILUA_BUILDDIR}"
 			-H"${CMAKE_CURRENT_SOURCE_DIR}/HostBuildTools/minilua"
 			-DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
 			-DCMAKE_BUILD_TYPE:STRING="Release"
@@ -344,8 +351,8 @@ if (NOT PROJECT_PLATFORM_E2K)
 	)
 
 	add_custom_command(OUTPUT ${BUILDVM_ARCH}
-		COMMAND ${CMAKE_CURRENT_BINARY_DIR}/HostBuildTools/minilua/minilua ${DASM} ${DASM_FLAGS} -o ${BUILDVM_ARCH} ${DASM_DASC}
-		DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/HostBuildTools/minilua/minilua"
+		COMMAND ${MINILUA_EXEC} ${DASM} ${DASM_FLAGS} -o ${BUILDVM_ARCH} ${DASM_DASC}
+		DEPENDS ${MINILUA_EXEC}
 	)
 
 	add_custom_target(buildvm_arch
