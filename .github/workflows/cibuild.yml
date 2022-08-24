@@ -20,20 +20,63 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
+    - name: Translate configuration to variables
+      id: build-vars
+      shell: bash
+      run: |
+        vswhere_target="${{ matrix.Platform }}"
+        cmake_target="${{ matrix.Platform }}"
+        cmake_config="${{ matrix.Configuration }}"
+        cmake_mastergold="OFF"
+
+        # Translate platform names to what vswhere/cmake expect
+        if [ '${{ matrix.Platform }}' == 'x86' ]; then
+          cmake_target="Win32"
+        elif [ '${{ matrix.Platform }}' == 'x64' ]; then
+          vswhere_target="amd64"
+        fi
+
+        # Translate build configuration to CMake flags
+        if [ '${{ matrix.Configuration }}' == 'Release Master Gold' ]; then
+          cmake_config="Release"
+          cmake_mastergold="ON"
+        elif [ '${{ matrix.Configuration }}' == 'Mixed' ]; then
+          cmake_config="RelWithDebInfo"
+        fi
+
+        echo "vswhere target: ${vswhere_target}"
+        echo "::set-output name=vswhere_target::${vswhere_target}"
+
+        echo "CMake target: ${cmake_target}"
+        echo "::set-output name=cmake_target::${cmake_target}"
+
+        echo "CMake config: ${cmake_config}"
+        echo "::set-output name=cmake_config::${cmake_config}"
+
+        echo "Building with MASTER_GOLD: ${cmake_mastergold}"
+        echo "::set-output name=cmake_mastergold::${cmake_mastergold}"
+
+    - name: Setup MSVC toolchain
+      uses: seanmiddleditch/gha-setup-vsdevenv@v4
+      with:
+        arch: ${{ steps.build-vars.outputs.vswhere_target }}
 
     - name: Setup NuGet.exe
       uses: nuget/setup-nuget@v1
       with:
         nuget-version: '5.x'
 
-    - name: Restore NuGet packages
-      run: nuget restore src\engine.sln
+    # TODO Will be done from within CMake once configured
+    #- name: Restore NuGet packages
+    #  run: nuget restore src\engine.sln
 
-    - name: MSBuild
-      working-directory: src
-      run: msbuild /m /p:Configuration="${{ matrix.Configuration }}" /p:Platform="${{ matrix.Platform }}" engine.sln
+    - name: CMake Configure
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=${{ steps.build-vars.outputs.cmake_config }} -DCMAKE_GENERATOR_PLATFORM=${{ steps.build-vars.outputs.cmake_target }} -DMASTER_GOLD=${{ steps.build-vars.outputs.cmake_mastergold }}
+
+    - name: CMake Build
+      run: |
+        cmake --build build --config ${{ steps.build-vars.outputs.cmake_config }} --parallel 2
 
     - name: Prepare artifacts
       id: windows-vars
