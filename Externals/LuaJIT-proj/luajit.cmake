@@ -135,7 +135,8 @@ string(REPLACE " " ";" TESTARCH_C_FLAGS "${TESTARCH_C_FLAGS}")
 
 set(TESTARCH_FLAGS "${TESTARCH_C_FLAGS} ${CCOPTIONS}")
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-	string(APPEND TESTARCH_FLAGS " /EP lj_arch.h")
+  # /d1PP is undocumented but widely known & used, causes pre-processor to not strip defines
+	string(APPEND TESTARCH_FLAGS " /EP /d1PP lj_arch.h")
 else()
 	string(APPEND TESTARCH_FLAGS " -E lj_arch.h -dM")
 endif()
