@@ -65,10 +65,13 @@ if (NOT MSVC)
 endif()
 
 # Compiler options
-if (PROJECT_PLATFORM_E2K) # E2K: O3 on mcst-lcc approximately equal to O2 at gcc X86/ARM
-	set(CCOPT_OPT_LEVEL "-O3")
-else()
-	set(CCOPT_OPT_LEVEL "-O2")
+# TODO: Should this really unconditionally add optimisations? Breaks on MSVC, mixing optimisations with debug runtime checks
+if (NOT MSVC OR NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+	if (PROJECT_PLATFORM_E2K) # E2K: O3 on mcst-lcc approximately equal to O2 at gcc X86/ARM
+		set(CCOPT_OPT_LEVEL "-O3")
+	else()
+		set(CCOPT_OPT_LEVEL "-O2")
+	endif()
 endif()
 
 set(CCOPT "${CCOPT_OPT_LEVEL}")
