@@ -72,13 +72,11 @@ jobs:
 
     - name: CMake Configure
       run: |
-        set VERBOSE=1
         cmake -B build -DCMAKE_BUILD_TYPE=${{ steps.build-vars.outputs.cmake_config }} -DCMAKE_GENERATOR_PLATFORM=${{ steps.build-vars.outputs.cmake_target }} -DMASTER_GOLD=${{ steps.build-vars.outputs.cmake_mastergold }}
 
     - name: CMake Build
       run: |
-        set VERBOSE=1
-        cmake --build build --config ${{ steps.build-vars.outputs.cmake_config }} --parallel 2
+        cmake --build build --config ${{ steps.build-vars.outputs.cmake_config }} --parallel 2 -- -verbosity:diagnostic
 
     - name: Prepare artifacts
       id: windows-vars
