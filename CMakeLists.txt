@@ -155,7 +155,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND NOT XRAY_USE_DEFAULT_CXX_LIB)
     endif()
 endif()
 
-if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+if (NOT MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -Wl,--no-undefined -fvisibility=hidden")
 endif()
 
@@ -171,7 +171,7 @@ set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${SANITIZE_FLAGS}")
 
 set(LUA_LIBRARIES xrLuajit)
 
-if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+if (NOT MSVC)
     if (PROJECT_PLATFORM_ARM)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfpu=neon")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpu=neon")
@@ -211,7 +211,7 @@ endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DDEBUG -DMIXED)
-    if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    if (NOT MSVC)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Og")
     endif()
     set(LUA_LIBRARIES xrLuajit-debug)
@@ -281,7 +281,7 @@ include_directories(
 
 add_subdirectory(Externals)
 
-if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+if (NOT MSVC)
     set(CMAKE_CXX_FLAGS
         "${CMAKE_CXX_FLAGS}"
         "-Wall"

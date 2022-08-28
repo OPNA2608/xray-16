@@ -8,6 +8,10 @@ add_subdirectory(OPCODE)
 add_subdirectory(ode)
 #add_subdirectory(NVTT)
 
+if (MSVC)
+    add_subdirectory(lzo EXCLUDE_FROM_ALL)
+endif()
+
 if (MEMORY_ALLOCATOR STREQUAL "mimalloc")
     set(MI_BUILD_TESTS   OFF CACHE STRING "" FORCE)
     set(MI_BUILD_DYNAMIC OFF CACHE STRING "" FORCE)
