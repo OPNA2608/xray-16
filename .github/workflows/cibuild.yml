@@ -76,7 +76,8 @@ jobs:
 
     - name: CMake Build
       run: |
-        cmake --build build --config ${{ steps.build-vars.outputs.cmake_config }} --parallel 2 -- -v:d
+        # Quoted verbosity flag because https://github.com/PowerShell/PowerShell/issues/17399
+        cmake --build build --config ${{ steps.build-vars.outputs.cmake_config }} --parallel 2 -- '-v:d'
 
     - name: Prepare artifacts
       id: windows-vars
