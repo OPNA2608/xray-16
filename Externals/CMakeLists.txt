@@ -10,6 +10,7 @@ add_subdirectory(ode)
 
 if (MSVC)
     add_subdirectory(lzo EXCLUDE_FROM_ALL)
+    set(LZO_LIBRARIES lzo_static PARENT_SCOPE)
 endif()
 
 if (MEMORY_ALLOCATOR STREQUAL "mimalloc")
